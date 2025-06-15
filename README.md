@@ -1,4 +1,4 @@
-# 🧮 Financial Sentiment Analysis for Market Trends
+# 💲 Financial Sentiment Analysis for Market Trends
 
 ---
 
