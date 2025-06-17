@@ -9,7 +9,7 @@ from pathlib import Path
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Output paths
-RAW_DATA_DIR = Path('..data/raw/')
+RAW_DATA_DIR = Path('/Users/karth/FinancialSentimentAnalysis/data/raw/')
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Extract Data
