@@ -1,0 +1,4 @@
+pandas~=2.2.3
+yfinance~=0.2.63
+newsapi~=0.1.1
+python-dotenv~=1.1.0
