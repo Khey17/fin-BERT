@@ -1,10 +1,13 @@
 # scripts/news_data.py
 import argparse
 import os
+import shutil
 from dotenv import load_dotenv
 
 import pandas as pd
 from newsapi import NewsApiClient
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 import logging
 from pathlib import Path
 
@@ -14,6 +17,32 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Output paths
 RAW_DATA_DIR = Path('/Users/karth/FinancialSentimentAnalysis/data/raw/')
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# News Library
+NEWS_DIR = Path('/Users/karth/FinancialSentimentAnalysis/data/raw/news_files/')
+NEWS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Compute Dates
+def compute_date_range(period='1mo'):
+    '''
+    Automates Date calculations -> Days, Weeks, Months
+    :param period: Time Period
+    :return: Start date, Current Date
+    '''
+    today = datetime.today()
+    if period.endswith('d'):
+        delta = timedelta(days=int(period[:-1]))
+    elif period.endswith('w'):
+        delta = timedelta(weeks=int(period[:-1]))
+    elif period.endswith('mo'):
+        delta = relativedelta(months=int(period[:-2]))
+    else:
+        raise ValueError("Unsupported period format. Use '7d', '2w', or '1mo'.")
+
+    from_date = (today - delta).strftime('%Y-%m-%d')
+    to_date = today.strftime('%Y-%m-%d')
+    return from_date, to_date
+
 
 # Extract News Data
 def extract_news_data(api_key, query = 'Apple', from_date='2025-05-17', to_date='2025-06-17',
@@ -64,14 +93,21 @@ def save_data(df, filename):
     logging.info(f'Saved data to {filepath}')
 
 if __name__ == '__main__':
+    # Archive old news file if it exists
+    old_news = RAW_DATA_DIR / 'news_Apple_AAPL.csv'
+    try:
+        shutil.move(old_news, NEWS_DIR / old_news.name)
+        logging.info(f'Archived old news file to {NEWS_DIR / old_news.name}')
+    except FileNotFoundError:
+        logging.warning(f'No previous news file found to archive. Skipping.')
+
     # Load .env file
     load_dotenv()
 
     parser = argparse.ArgumentParser(description='Extract stock news data')
     parser.add_argument('--api_key', type=str, default=os.getenv('NEWSAPI_KEY'), help='Load gotenv')
     parser.add_argument('--query', type=str, default='Apple AAPL', help='Company stocks to download')
-    parser.add_argument('--from_date', type=str, default='2025-05-17', help='Start date')
-    parser.add_argument('--to_date', type=str, default='2025-06-17', help='End date')
+    parser.add_argument('--period', type=str, default='1mo', help="Relative time period like '7d', '1mo'")
 
     # Instantiate parser
     args = parser.parse_args()
@@ -79,8 +115,7 @@ if __name__ == '__main__':
     # API key
     KEY = args.api_key
     q = args.query
-    from_date = args.from_date
-    to_date = args.to_date
+    from_date, to_date = compute_date_range(args.period)
 
     news_data = extract_news_data(KEY, q, from_date, to_date)
     save_data(news_data, f'news_{args.query.replace(" ", "_")}.csv')

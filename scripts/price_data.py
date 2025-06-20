@@ -1,5 +1,6 @@
 # scripts/price_data.py
 import argparse
+import shutil
 from email.policy import default
 
 import pandas as pd
@@ -15,6 +16,10 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # Output paths
 RAW_DATA_DIR = Path('/Users/karth/FinancialSentimentAnalysis/data/raw/')
 RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+# Stocks Library
+STOCK_DIR = Path('/Users/karth/FinancialSentimentAnalysis/data/raw/stock_files/')
+STOCK_DIR.mkdir(parents=True, exist_ok=True)
 
 # Extract Data
 def extract_price_data(ticker: str, period: str = '1y') -> pd.DataFrame:
@@ -47,6 +52,14 @@ def save_data(df: pd.DataFrame, filename: str):
     logging.info(f'Saving data to {filepath}...')
 
 if __name__ == '__main__':
+    # Archive old news file if it exists
+    old_prices = RAW_DATA_DIR / 'price_AAPL.csv'
+    try:
+        shutil.move(old_prices, STOCK_DIR / old_prices.name)
+        logging.info(f'Archived old stocks file to {STOCK_DIR / old_prices.name}')
+    except FileNotFoundError:
+        logging.warning(f'No previous stocks file found to archive. Skipping.')
+
     parser = argparse.ArgumentParser(description='Extract stock price data')
     parser.add_argument('--ticker', type=str, default='AAPL', help='Stock ticker symbol')
     parser.add_argument('--period', type=str, default='1mo', help='Period of data to download')
