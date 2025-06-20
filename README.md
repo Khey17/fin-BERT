@@ -8,7 +8,7 @@ This project aims to explore the relationship between financial news sentiment a
 
 ---
 
-## 🏗️ Current Phase: Phase 0 - Environment Setup
+## 🏗️ Environment Setup
 
 - MacOS system
 - Installed Miniconda (environment management)
