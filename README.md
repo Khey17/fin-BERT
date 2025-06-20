@@ -47,4 +47,4 @@ This project aims to explore the relationship between financial news sentiment a
 
 ## 📅 Project Status
 
-Currently setting up the environment and preparing for Phase 1: Problem Scoping.
+Built a Data Pipeline that collects daily data of apple stock prices and news that affects the prices, and moving on to Phase 3: Data Cleaning/Preprocessing
