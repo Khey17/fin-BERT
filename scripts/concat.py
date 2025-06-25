@@ -32,14 +32,18 @@ def append_data(file: str, output_file: Path = RAW_DATA_DIR, news_api=False) -> 
         return
 
     # Combine & drop duplicates
-    merged_df = pd.concat([df1, df2]).drop_duplicates().reset_index(drop=True)
+    logging.info(f"Old file shape: {df1.shape}")
+    logging.info(f"New file shape: {df2.shape}")
 
-    # Optional: sort by date if applicable
+    merged_df = pd.concat([df1, df2]).drop_duplicates().reset_index(drop=True)
+    logging.info(f"Merged shape (after deduplication): {merged_df.shape}")
+
+    # Sort by date
     if 'publishedAt' in merged_df.columns:
-        merged_df['publishedAt'] = pd.to_datetime(merged_df['publishedAt'])
+        merged_df['publishedAt'] = pd.to_datetime(merged_df['publishedAt'], utc=True, errors='coerce')
         merged_df = merged_df.sort_values('publishedAt')
     else:
-        merged_df['Date'] = pd.to_datetime(merged_df['Date'])
+        merged_df['Date'] = pd.to_datetime(merged_df['Date'], errors='coerce')
         merged_df = merged_df.sort_values('Date')
 
     merged_df.to_csv(output_file / file, index=False)
