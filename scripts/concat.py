@@ -35,20 +35,44 @@ def append_data(file: str, output_file: Path = RAW_DATA_DIR, news_api=False) -> 
     logging.info(f"Old file shape: {df1.shape}")
     logging.info(f"New file shape: {df2.shape}")
 
-    merged_df = pd.concat([df1, df2]).drop_duplicates().reset_index(drop=True)
+    merged_df = pd.concat([df1, df2], ignore_index=True).drop_duplicates()
     logging.info(f"Merged shape (after deduplication): {merged_df.shape}")
 
-    # Sort by date
+    # Clean + parse dates
     if 'publishedAt' in merged_df.columns:
-        merged_df['publishedAt'] = pd.to_datetime(merged_df['publishedAt'], utc=True, errors='coerce')
-        merged_df = merged_df.sort_values('publishedAt')
+        date_col = 'publishedAt'
     else:
-        merged_df['Date'] = pd.to_datetime(merged_df['Date'], errors='coerce')
-        merged_df = merged_df.sort_values('Date')
+        date_col = 'Date'
 
+    # Clean string formatting issues
+    merged_df[date_col] = (
+        merged_df[date_col]
+        .astype(str)
+        .str.strip()
+        .str.replace('"', '')
+    )
+
+    # Parse datetime with fallback
+    merged_df[date_col] = pd.to_datetime(
+        merged_df[date_col],
+        format='ISO8601',
+        utc=True,
+        errors='coerce'
+    )
+
+    null_count = merged_df[date_col].isna().sum()
+    if null_count > 0:
+        logging.warning(f"{null_count} rows dropped due to invalid dates.")
+        merged_df = merged_df.dropna(subset=[date_col])
+
+    # Sort by date
+    merged_df = merged_df.sort_values(by=date_col).reset_index(drop=True)
+
+    # Save
     merged_df.to_csv(output_file / file, index=False)
-    logging.info(f"Merged file saved to: {output_file}")
-
+    logging.info(f"Merged file saved to: {output_file / file}")
+    logging.info(
+        f"Final row count: {merged_df.shape[0]} | Date range: {merged_df[date_col].min()} → {merged_df[date_col].max()}")
 
 if __name__ == "__main__":
     append_data('news_Apple_AAPL.csv', news_api=True)
