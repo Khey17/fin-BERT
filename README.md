@@ -8,7 +8,7 @@ This project aims to explore the relationship between financial news sentiment a
 
 ---
 
-## 🏗️ Current Phase: Phase 0 - Environment Setup
+## 🏗️ Environment Setup
 
 - MacOS system
 - Installed Miniconda (environment management)
@@ -47,4 +47,5 @@ This project aims to explore the relationship between financial news sentiment a
 
 ## 📅 Project Status
 
-Currently setting up the environment and preparing for Phase 1: Problem Scoping.
+✅ Built a data pipeline to collect daily stock prices for Apple (AAPL) and related financial news headlines using Yahoo Finance and NewsAPI.  
+🔜 Moving on to **Phase 3: Data Cleaning & Preprocessing** — aligning timestamps, cleaning text, and preparing data for sentiment inference.
